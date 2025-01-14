@@ -1,6 +1,5 @@
-
 TOOL.Category		= "Constraints"
-TOOL.Name			= "#Precision"
+TOOL.Name			= "#tool.precision.name"
 TOOL.Command		= nil
 TOOL.ConfigName		= ""
 
@@ -116,17 +115,7 @@ end
 
 function TOOL:DoApply(CurrentEnt, FirstEnt, autorotate, nocollideall, ShadowDisable )
 	local CurrentPhys = CurrentEnt:GetPhysicsObject()
-	
-	//local col = CurrentEnt:GetCollisionGroup()
-	//col = 19
-	//CurrentEnt:SetCollisionGroup(col)
-	//self:SendMessage("New group: "..col)
-	
-	//if ( CurrentPhys:IsDragEnabled() ) then
-	//end
-	//CurrentPhys:SetAngleDragCoefficient(1.05)
-	//CurrentPhys:SetDragCoefficient(1.05)
-	
+
 	if ( autorotate ) then
 		if ( CurrentEnt == FirstEnt ) then//Snap-rotate original object first.  Rest needs to rotate around it.
 			local angle = CurrentPhys:RotateAroundAxis( Vector( 0, 0, 1 ), 0 )
@@ -236,9 +225,8 @@ function TOOL:DoConstraint(mode)
 		LPos2 = self:GetLocalPos(2)
 	end
 	local Phys1 = self:GetPhys(1)
-	
+
 	local NumApp = 0
-	
 
 	for key,CurrentEnt in pairs(self.TaggedEnts) do
 		if ( CurrentEnt and CurrentEnt:IsValid() ) then
@@ -379,8 +367,6 @@ function TOOL:DoConstraint(mode)
 	elseif ( mode == 11 ) then
 		self:SendMessage( NumApp .. " items targeted for constraint removal." )
 	end
-	
-	
 	if ( mode == 10 ) then
 		self.RepairTodo = true
 		timer.Simple( 1.0, function()
@@ -431,7 +417,7 @@ function TOOL:StartRotate()
 			Entity:SetPos( oldposu )
 		end
 	end
-	
+
 	if ( self:GetClientNumber( "rotateundo" )) then
 		if SERVER then
 			undo.Create("Precision_Rotate")
@@ -440,11 +426,11 @@ function TOOL:StartRotate()
 			undo.Finish()
 		end
 	end
-	
+
 	if IsValid( Phys ) then
 		Phys:EnableMotion( false ) //else it drifts
 	end
-	
+
 	local rotation = self:GetClientNumber( "rotation" )
 	if ( rotation < 0.02 ) then rotation = 0.02 end
 	self.axis = self:GetNormal(1)
@@ -466,7 +452,6 @@ function TOOL:DoMove()
 	// Get information we're about to use
 	local Norm1, Norm2 = self:GetNormal(1),   self:GetNormal(2)
 	local Phys1, Phys2 = self:GetPhys(1),     self:GetPhys(2)
-	
 	local Ang1, Ang2 = Norm1:Angle(), (Norm2 * -1):Angle()
 	if self:GetClientNumber( "autorotate" ) == 1 then
 		Ang2.p = (math.Round(Ang2.p/45))*45
@@ -474,7 +459,6 @@ function TOOL:DoMove()
 		Ang2.y = (math.Round(Ang2.y/45))*45
 		Norm2 = Ang2:Forward() * -1
 	end
-
 
 	local oldposu = self:GetEnt(1):GetPos()
 	local oldangles = self:GetEnt(1):GetAngles()
@@ -520,10 +504,7 @@ function TOOL:DoMove()
 		self.axisZ:Normalize()
 	end
 
-
-
 	local TargetAngle = Phys1:AlignAngles( Ang1, Ang2 )//Get angle Phys1 would be at if difference between Ang1 and Ang2 was added
-
 
 	if self:GetClientNumber( "autorotate" ) == 1 then
 		TargetAngle.p = (math.Round(TargetAngle.p/45))*45
@@ -532,7 +513,6 @@ function TOOL:DoMove()
 	end
 
 	Phys1:SetAngles( TargetAngle )
-
 
 	local NewOffset = math.Clamp( self:GetClientNumber( "offset" ), -5000, 5000 )
 	local offsetpercent		= self:GetClientNumber( "offsetpercent" ) == 1
@@ -634,7 +614,6 @@ function TOOL:SelectEnts(StartEnt, AllConnected)
 			end
 		end
 	end
-	
 end
 
 function TOOL:LeftClick( trace )
@@ -644,13 +623,12 @@ function TOOL:LeftClick( trace )
 	local rotating = ( self:GetClientNumber( "rotate" ) == 1 )
 	local Phys = trace.Entity:GetPhysicsObjectNum( trace.PhysicsBone )
 
-	
 	if ( stage == 0 ) then//first click - choose a target.
 		if ( self:TargetValidity(trace, Phys) <= 1 ) then
 			return false//No phys or hit world
 		end
 		self:SetObject( 1, trace.Entity, trace.HitPos, Phys, trace.PhysicsBone, trace.HitNormal )
-		
+
 		if (self:GetClientNumber( "entirecontrap" ) == 1 || mode == 10 ) then
 			self:SelectEnts(trace.Entity,1)
 		else
@@ -675,7 +653,7 @@ function TOOL:LeftClick( trace )
 		end
 	elseif ( stage == 1 ) then//Second click
 		self:SetObject( 2, trace.Entity, trace.HitPos, Phys, trace.PhysicsBone, trace.HitNormal )
-		
+
 		if ( self:GetEnt(1) == self:GetEnt(2) ) then
 			SavedPos = self:GetPos(2)
 		end
@@ -726,7 +704,6 @@ function TOOL:WithinABit( v1, v2 )
 end
 
 if ( SERVER ) then
-	
 	function GetAllEnts( Ent, OrderedEntList, EntsTab, ConstsTab )
 		if ( Ent and Ent:IsValid() ) and ( !EntsTab[ Ent:EntIndex() ] ) then
 			EntsTab[ Ent:EntIndex() ] = Ent
@@ -747,7 +724,7 @@ if ( SERVER ) then
 		end
 		return OrderedEntList
 	end
-	
+
 	function GetAllConstraints( EntsTab )
 		local ConstsTab = {}
 		for key, Ent in pairs( EntsTab ) do
@@ -765,7 +742,7 @@ if ( SERVER ) then
 end
 
 function TOOL:UpdateCustomGhost( ghost, player, offset )
-	
+
 	// Ghost is identically buggy to that of easyweld...  welding two frozen props and two unfrozen props yields different ghosts even if identical allignment
 
 	if (ghost == nil) then return end
@@ -779,7 +756,7 @@ function TOOL:UpdateCustomGhost( ghost, player, offset )
 	local TargetAngle = self:GetEnt(1):AlignAngles( Ang1, Ang2 )
 
 	self.GhostEntity:SetPos( self:GetEnt(1):GetPos() )
-	
+
 	if self:GetClientNumber( "autorotate" ) == 1 then
 		TargetAngle.p = (math.Round(TargetAngle.p/45))*45
 		TargetAngle.r = (math.Round(TargetAngle.r/45))*45
@@ -816,7 +793,7 @@ function TOOL:Think()
 	local pl = self:GetOwner()
 	local wep = pl:GetActiveWeapon()
 	if not wep:IsValid() or wep:GetClass() != "gmod_tool" or pl:GetInfo("gmod_toolmode") != "precision" then return end
-		
+
 	if (self:NumObjects() < 1) then return end
 	local Ent1 = self:GetEnt(1)
 	if ( SERVER ) then
@@ -896,7 +873,6 @@ function TOOL:Think()
 				Norm2 = Norm2 * (-0.0625 + NewOffset)
 				local TargetPos = Vector(0,0,0)
 				if ( self:GetEnt(1) == self:GetEnt(2) ) then
-	//////////////////////////////////////////
 					TargetPos = SavedPos + (Phys1:GetPos() - self:GetPos(1)) + (Norm2)
 				else
 					TargetPos = WPos2 + (Phys1:GetPos() - self:GetPos(1)) + (Norm2)
@@ -1043,87 +1019,76 @@ end
 
 if CLIENT then
 
-	language.Add( "Tool.precision.name", "Precision Tool 0.98e" )
-	language.Add( "Tool.precision.desc", "Accurately moves/constrains objects" )
-	language.Add( "Tool.precision.0", "Primary: Move/Apply | Secondary: Push | Reload: Pull" )
-	language.Add( "Tool.precision.1", "Target the second item. If enabled, this will move the first item.  (Swap weps to cancel)" )
-	language.Add( "Tool.precision.2", "Rotate enabled: Turn left and right to rotate the object (Hold Reload or Secondary for other rotation directions!)" )
+	language.Add("tool.precision.name", "Precision")
+	language.Add("tool.precision.desc", "Accurately moves/constrains objects")
+	language.Add("tool.precision.0", "Primary: Move/Apply - Secondary: Push - Reload: Pull")
+	language.Add("tool.precision.1", "Target the second item. If enabled, this will move the first item.")
+	language.Add("tool.precision.2", "Rotate enabled: Turn left and right to rotate the object (Hold Reload or Secondary for other rotation directions!)")
 
-
-	language.Add("Undone.precision", "Undone Precision Constraint")
-	language.Add("Undone.precision.nudge", "Undone Precision PushPull")
-	language.Add("Undone.precision.rotate", "Undone Precision Rotate")
-	language.Add("Undone.precision.move", "Undone Precision Move")
-	language.Add("Undone.precision.weld", "Undone Precision Weld")
-	language.Add("Undone.precision.axis", "Undone Precision Axis")
-	language.Add("Undone.precision.ballsocket", "Undone Precision Ballsocket")
-	language.Add("Undone.precision.advanced.ballsocket", "Undone Precision Advanced Ballsocket")
-	language.Add("Undone.precision.slider", "Undone Precision Slider")
+	language.Add("undone.precision", "Undone Precision Constraint")
+	language.Add("undone.precision.nudge", "Undone Precision PushPull")
+	language.Add("undone.precision.rotate", "Undone Precision Rotate")
+	language.Add("undone.precision.move", "Undone Precision Move")
+	language.Add("undone.precision.weld", "Undone Precision Weld")
+	language.Add("undone.precision.axis", "Undone Precision Axis")
+	language.Add("undone.precision.ballsocket", "Undone Precision Ballsocket")
+	language.Add("undone.precision.advanced.ballsocket", "Undone Precision Advanced Ballsocket")
+	language.Add("undone.precision.slider", "Undone Precision Slider")
 
 	local showgenmenu = 0//Seems to hide often, probably for the best
 
 	local function AddDefControls( Panel )
-		Panel:ClearControls()
+		Panel:Clear()
 
-		Panel:AddControl("ComboBox",
-		{
-			Label = "#Presets",
-			MenuButton = 1,
-			Folder = "precision",
-			Options = {},
-			CVars =
-			{
-				[0] = "precision_offset",
-				[1] = "precision_forcelimit",
-				[2] = "precision_freeze",
-				[3] = "precision_nocollide",
-				[4] = "precision_nocollideall",
-				[5] = "precision_rotation",
-				[6] = "precision_rotate",
-				[7] = "precision_torquelimit",
-				[8] = "precision_friction",
-				[9] = "precision_mode",
-				[10] = "precision_width",
-				[11] = "precision_offsetpercent",
-				[12] = "precision_removal",
-				[13] = "precision_move",
-				[14] = "precision_physdisable",
-				[15] = "precision_advballsocket",
-				[16] = "precision_XRotMin",
-				[17] = "precision_XRotMax",
-				[18] = "precision_YRotMin",
-				[19] = "precision_YRotMax",
-				[20] = "precision_ZRotMin",
-				[21] = "precision_ZRotMax",
-				[22] = "precision_XRotFric",
-				[23] = "precision_YRotFric",
-				[24] = "precision_ZRotFric",
-				[25] = "precision_FreeMov",
-				[26] = "precision_ShadowDisable",
-				[27] = "precision_allowphysgun",
-				[28] = "precision_autorotate",
-				[29] = "precision_massmode",
-				[30] = "precision_nudge",
-				[31] = "precision_nudgepercent",
-				[32] = "precision_disablesliderfix"
-			}
-		})
+		local presets = vgui.Create( "ControlPresets", Panel )
+		presets:SetPreset( "precision" )
+		presets:AddConVar( "precision_offset" )
+		presets:AddConVar( "precision_forcelimit" )
+		presets:AddConVar( "precision_freeze" )
+		presets:AddConVar( "precision_nocollide" )
+		presets:AddConVar( "precision_nocollideall" )
+		presets:AddConVar( "precision_rotation" )
+		presets:AddConVar( "precision_rotate" )
+		presets:AddConVar( "precision_torquelimit" )
+		presets:AddConVar( "precision_friction" )
+		presets:AddConVar( "precision_mode" )
+		presets:AddConVar( "precision_width" )
+		presets:AddConVar( "precision_offsetpercent" )
+		presets:AddConVar( "precision_removal" )
+		presets:AddConVar( "precision_move" )
+		presets:AddConVar( "precision_physdisable" )
+		presets:AddConVar( "precision_advballsocket" )
+		presets:AddConVar( "precision_XRotMin" )
+		presets:AddConVar( "precision_XRotMax" )
+		presets:AddConVar( "precision_YRotMin" )
+		presets:AddConVar( "precision_YRotMax" )
+		presets:AddConVar( "precision_ZRotMin" )
+		presets:AddConVar( "precision_ZRotMax" )
+		presets:AddConVar( "precision_XRotFric" )
+		presets:AddConVar( "precision_YRotFric" )
+		presets:AddConVar( "precision_ZRotFric" )
+		presets:AddConVar( "precision_FreeMov" )
+		presets:AddConVar( "precision_ShadowDisable" )
+		presets:AddConVar( "precision_allowphysgun" )
+		presets:AddConVar( "precision_autorotate" )
+		presets:AddConVar( "precision_massmode" )
+		presets:AddConVar( "precision_nudge" )
+		presets:AddConVar( "precision_nudgepercent" )
+		presets:AddConVar( "precision_disablesliderfix" )
+		Panel:AddPanel( presets )
 
-		//Panel:AddControl( "Label", { Text = "Secondary attack pushes, Reload pulls by this amount:", Description	= "Phx 1x is 47.45, Small tiled cube is 11.8625 and thin is 3 exact units" }  )
-		Panel:AddControl( "Slider",  { Label	= "Push/Pull Amount",
-					Type	= "Float",
-					Min		= 1,
-					Max		= 100,
-					Command = "precision_nudge",
-					Description = "Distance to push/pull props with altfire/reload"}	 ):SetDecimals( 4 )
+		local pp = Panel:NumSlider( "Push/Pull Amount", "precision_nudge", 1, 100, 4 )
+		local ppDef = GetConVar( "precision_nudge" )
+		Panel:ControlHelp( "Distance to push/pull props with altfire/reload." )
+		if ( ppDef ) then
+			ctrl:SetDefaultValue( ppDef:GetDefault() )
+		end
 
-
-		Panel:AddControl( "Checkbox", { Label = "Push/Pull as Percent (%) of target's depth", Command = "precision_nudgepercent", Description = "Unchecked = Exact units, Checked = takes % of width from target prop when pushing/pulling" } )
-
+		Panel:CheckBox( "Push/Pull as Percent (%)", "precision_nudgepercent" )
+		Panel:ControlHelp( "Takes % of width from target prop when pushing/pulling, instead of exact units." )
 
 		local user = LocalPlayer():GetInfoNum( "precision_user", 0 )
 		local mode = LocalPlayer():GetInfoNum( "precision_mode", 0 )
-		//Panel:AddControl( "Label", { Text = "Primary attack uses the tool's main mode.", Description	= "Select a mode and configure the options, be sure to try new things out!" }  )
 
 		local list = vgui.Create("DListView")
 
@@ -1134,10 +1099,8 @@ if CLIENT then
 		elseif ( user < 3 ) then
 			height = 170 //9 shown
 		end
-		
 
 		list:SetSize(30,height)
-		//list:SizeToContents()
 		list:AddColumn("Tool Mode")
 		list:SetMultiSelect(false)
 		function list:OnRowSelected(LineID, line)
@@ -1209,244 +1172,201 @@ if CLIENT then
 		Panel:AddItem(list)
 
 		if ( mode >= 4 && mode <= 8 ) then
-			Panel:AddControl( "Checkbox", { Label = "Move Target? ('Easy' constraint mode)", Command = "precision_move", Description = "Uncheck this to apply the constraint without altering positions." } )
+			Panel:CheckBox( "Move Target", "precision_move" )
+			Panel:ControlHelp( "Uncheck this to apply the constraint without altering positions." )
 		end
 		if (  mode >= 3 && mode <= 8 ) then
-			Panel:AddControl( "Checkbox", { Label = "Rotate Target? (Rotation after moving)", Command = "precision_rotate", Description = "Uncheck this to remove the extra click for rotation. Handy for speed building." } )
-			//Panel:AddControl( "Label", { Text = "This is the distance from touching of the targeted props after moving:", Description	= "Use 0 mostly, % takes the second prop's width." }  )
-			Panel:AddControl( "Slider",  { Label	= "Snap Distance",
-					Type	= "Float",
-					Min		= 0,
-					Max		= 10,
-					Command = "precision_offset",
-					Description = "Distance offset between joined props.  Type in negative to inset when moving."}	 )
-			Panel:AddControl( "Checkbox", { Label = "Snap distance as Percent (%) of target's depth", Command = "precision_offsetpercent", Description = "Unchecked = Exact units, Checked = takes % of width from second prop" } )
+			Panel:CheckBox( "Rotate Target (Rotation after moving)", "precision_rotate" )
+			Panel:ControlHelp( "Uncheck this to remove the extra click for rotation. Handy for speed building." )
+			Panel:NumSlider( "Snap Distance", "precision_offset", 0, 10, 2 )
+			Panel:ControlHelp( "Distance offset between joined props.  Type in negative to inset when moving." )
+			Panel:CheckBox( "Snap Distance as Percent (%)", "precision_offsetpercent" )
+			Panel:ControlHelp( "Takes % of width from second prop instead of exact units." )
 		end
 		if ( mode >= 2 && mode <= 8 ) then
-			Panel:AddControl( "Slider",  { Label	= "Rotation Snap (Degrees)",
-					Type	= "Float",
-					Min		= 0.02,
-					Max		= 90,
-					Command = "precision_rotation",
-					Description = "Rotation rotates by this amount at a time. No more guesswork. Min: 0.02 degrees "}	 ):SetDecimals( 4 )
+			Panel:NumSlider( "Snap Rotation (degrees)", "precision_rotation", 0.02, 90, 2 )
+			Panel:ControlHelp( "Rotation rotates by this amount at a time." )
 		end
 		if ( mode <= 8 ) then
-			Panel:AddControl( "Checkbox", { Label = "Freeze Target", Command = "precision_freeze", Description = "Freeze props when this tool is used" } )
+			Panel:CheckBox( "Freeze Target", "precision_freeze" )
+			Panel:ControlHelp( "Freeze props when this tool is used." )
 
 			if ( mode >= 3 && mode <= 8 ) then
-				Panel:AddControl( "Checkbox", { Label = "No Collide Targets", Command = "precision_nocollide", Description = "Nocollide pairs of props when this tool is used. Note: No current way to remove this constraint when used alone."  } )
+				Panel:CheckBox( "No Collide Targets", "precision_nocollide" )
+				Panel:ControlHelp( "Nocollide pairs of props when this tool is used." )
 			end
 		end
 
 		if ( user >= 2 || mode == 1 ) then
 			if ( (mode >= 3 && mode <= 8) || mode == 1 ) then
-				Panel:AddControl( "Checkbox", { Label = "Auto-align to world (nearest 45 degrees)", Command = "precision_autorotate", Description = "Rotates to the nearest world axis (similar to holding sprint and use with physgun)"  } )
+				Panel:CheckBox( "Auto-Align to World", "precision_autorotate" )
+				Panel:ControlHelp( "Rotates to the nearest world axis (similar to holding sprint and use with physgun)." )
 			end
 
 			if ( mode == 1 ) then
-				Panel:AddControl( "Checkbox", { Label = "Disable target shadow", Command = "precision_ShadowDisable", Description = "Disables shadows cast from the prop"  } )
+				Panel:CheckBox( "Disable Shadow", "precision_ShadowDisable" )
+				Panel:ControlHelp( "Disables shadows cast from the prop." )
 			end
 		end
 
 		if ( user >= 3 ) then
 			if ( mode == 1 ) then //apply
-				Panel:AddControl( "Checkbox", { Label = "Only Collide with Player", Command = "precision_nocollideall", Description = "Nocollides the first prop to everything and the world (except players collide with it). Warning: don't let it fall away through the world."  } )
-				Panel:AddControl( "Checkbox", { Label = "Disable Physics on object", Command = "precision_physdisable", Description = "Disables physics on the first prop (gravity, being shot etc won't effect it)"  } )
-				Panel:AddControl( "Checkbox", { Label = "Adv: Allow Physgun on PhysDisable objects", Command = "precision_allowphysgun", Description = "Disabled to stop accidents, use if you want to be able to manually move props after phyics disabling them (may break clipboxes)."  } )
-				
-				//Panel:AddControl( "Checkbox", { Label = "Drag", Command = "precision_drag", Description = ""  } )
+				Panel:CheckBox( "Only Collide with Player", "precision_nocollideall" )
+				Panel:ControlHelp( "No collides the first prop to everything and the world (except players collide with it)." )
+				Panel:CheckBox( "Disable Physics", "precision_physdisable" )
+				Panel:ControlHelp( "Disables physics on the first prop (gravity, being shot etc)." )
+				Panel:CheckBox( "Allow Physgun on Disabled", "precision_allowphysgun" )
+				Panel:ControlHelp( "Use if you want to be able to manually move props after phyics disabling them." )
 			end
 			if ( mode == 9 ) then //parent
-				Panel:AddControl( "Checkbox", { Label = "Adv: Allow Physgun on Parented objects", Command = "precision_allowphysgun", Description = "Disabled to stop accidents, use this if you want to play with the parenting hierarchy etc."  } )
+				Panel:CheckBox( "Allow Physgun on Parented", "precision_allowphysgun" )
+				Panel:ControlHelp( "Use this if you want to play with the parenting hierarchy etc." )
 			end
 		end
 		if ( user >= 2 ) then
 			if ( mode != 2 && mode != 3 && mode != 10 ) then //todo: entire contrap move/rotate support
-				Panel:AddControl( "Checkbox", { Label = "Entire Contraption! (Everything connected to target)", Command = "precision_entirecontrap", Description = "For mass constraining or removal or nudging or applying of things. Yay generic."  } )
+				Panel:CheckBox( "Entire Contraption", "precision_entirecontrap" )
+				Panel:ControlHelp( "For mass constraining or removal or nudging or applying of things." )
 			end
 		end
 
 		if ( user >= 2 ) then
 			if ( (mode >= 4 && mode <= 7) ) then //breakable constraint
-				Panel:AddControl( "Slider",  { Label	= "Force Breakpoint",
-						Type	= "Float",
-						Min		= 0.0,
-						Max		= 5000,
-						Command = "precision_forcelimit",
-						Description = "Applies to most constraint modes" }	 )
+				Panel:NumSlider( "Force Breakpoint", "precision_forcelimit", 0, 5000, 2 )
+				Panel:ControlHelp( "Applies to most constraint modes." )
 			end
 
-
 			if ( mode == 5 || mode == 6 || mode == 7 ) then //axis or ballsocket
-				Panel:AddControl( "Slider",  { Label	= "Torque Breakpoint",
-						Type	= "Float",
-						Min		= 0.0,
-						Max		= 5000,
-						Command = "precision_torquelimit",
-						Description = "Breakpoint of turning/rotational force"}	 )
+				Panel:NumSlider( "Torque Breakpoint", "precision_torquelimit", 0, 5000, 2 )
+				Panel:ControlHelp( "Breakpoint of turning/rotational force." )
 			end
 		end
 
 		if ( mode == 5 ) then //axis
-			Panel:AddControl( "Slider",  { Label	= "Axis Friction",
-					Type	= "Float",
-					Min		= 0.0,
-					Max		= 100,
-					Command = "precision_friction",
-					Description = "Turning resistance, this is best at 0 in most cases to conserve energy"}	 )
-		end
 
-		if ( mode ==7 ) then //adv ballsocket
-			Panel:AddControl( "Slider",  { Label	= "X Rotation Minimum",
-					Type	= "Float",
-					Min		= -180,
-					Max		= 180,
-					Command = "precision_XRotMin",
-					Description = "Rotation minimum of advanced ballsocket in X axis"}	 )
+			Panel:NumSlider( "Axis Friction", "precision_friction", 0, 100, 2 )
+			Panel:ControlHelp( "Turning resistance, this is best at 0 in most cases to conserve energy." )
 
-			Panel:AddControl( "Slider",  { Label	= "X Rotation Maximum",
-					Type	= "Float",
-					Min		= -180,
-					Max		= 180,
-					Command = "precision_XRotMax",
-					Description = "Rotation maximum of advanced ballsocket in X axis"}	 )
+		elseif ( mode == 7 ) then //adv ballsocket
 
-			Panel:AddControl( "Slider",  { Label	= "Y Rotation Minimum",
-					Type	= "Float",
-					Min		= -180,
-					Max		= 180,
-					Command = "precision_YRotMin",
-					Description = "Rotation minimum of advanced ballsocket in Y axis"}	 )
+			Panel:NumSlider( "X Rotation Minimum", "precision_XRotMin", -180, 180, 2 )
+			Panel:ControlHelp( "Rotation minimum of advanced ballsocket in X axis." )
+			Panel:NumSlider( "X Rotation Maximum", "precision_XRotMax", -180, 180, 2 )
+			Panel:ControlHelp( "Rotation maximum of advanced ballsocket in X axis." )
+			Panel:NumSlider( "Y Rotation Minimum", "precision_YRotMin", -180, 180, 2 )
+			Panel:ControlHelp( "Rotation minimum of advanced ballsocket in Y axis." )
+			Panel:NumSlider( "Y Rotation Maximum", "precision_YRotMax", -180, 180, 2 )
+			Panel:ControlHelp( "Rotation maximum of advanced ballsocket in Y axis." )
+			Panel:NumSlider( "Z Rotation Minimum", "precision_ZRotMin", -180, 180, 2 )
+			Panel:ControlHelp( "Rotation minimum of advanced ballsocket in Z axis." )
+			Panel:NumSlider( "Z Rotation Maximum", "precision_ZRotMax", -180, 180, 2 )
+			Panel:ControlHelp( "Rotation maximum of advanced ballsocket in Z axis." )
 
-			Panel:AddControl( "Slider",  { Label	= "Y Rotation Maximum",
-					Type	= "Float",
-					Min		= -180,
-					Max		= 180,
-					Command = "precision_YRotMax",
-					Description = "Rotation maximum of advanced ballsocket in Y axis"}	 )
+			Panel:NumSlider( "X Rotation Friction", "precision_XRotFric", 0, 100, 2 )
+			Panel:ControlHelp( "Rotation friction of advanced ballsocket in X axis." )
+			Panel:NumSlider( "Y Rotation Friction", "precision_YRotFric", 0, 100, 2 )
+			Panel:ControlHelp( "Rotation friction of advanced ballsocket in Y axis." )
+			Panel:NumSlider( "Z Rotation Friction", "precision_ZRotFric", 0, 100, 2 )
+			Panel:ControlHelp( "Rotation friction of advanced ballsocket in Z axis." )
 
-			Panel:AddControl( "Slider",  { Label	= "Z Rotation Minimum",
-					Type	= "Float",
-					Min		= -180,
-					Max		= 180,
-					Command = "precision_ZRotMin",
-					Description = "Rotation minimum of advanced ballsocket in Z axis"}	 )
+			Panel:CheckBox( "Free Movement", "precision_FreeMov" )
+			Panel:ControlHelp( "Only lock relative rotation, not position." )
 
-			Panel:AddControl( "Slider",  { Label	= "Z Rotation Maximum",
-					Type	= "Float",
-					Min		= -180,
-					Max		= 180,
-					Command = "precision_ZRotMax",
-					Description = "Rotation maximum of advanced ballsocket in Z axis"}	 )
+		elseif ( mode == 8 ) then //slider
 
-			Panel:AddControl( "Slider",  { Label	= "X Rotation Friction",
-					Type	= "Float",
-					Min		= 0,
-					Max		= 100,
-					Command = "precision_XRotFric",
-					Description = "Rotation friction of advanced ballsocket in X axis"}	 )
+			Panel:NumSlider( "Slider Width", "precision_width", 0, 10, 2 )
+			Panel:ControlHelp( "Width of the slider black line (0 = invisible)." )
+			Panel:CheckBox( "Turn off Stabilisation", "precision_disablesliderfix" )
+			Panel:ControlHelp( "Fix being separate X/Y/Z advanced ballsocket locks between the props." )
+			Panel:Help( "Stabilisation is separate X/Y/Z adv. ballsockets; it makes it far less prone to rotation triggered spaz." )
 
-			Panel:AddControl( "Slider",  { Label	= "Y Rotation Friction",
-					Type	= "Float",
-					Min		= 0,
-					Max		= 100,
-					Command = "precision_YRotFric",
-					Description = "Rotation friction of advanced ballsocket in Y axis"}	 )
+		elseif ( mode == 9 ) then //parent
 
-			Panel:AddControl( "Slider",  { Label	= "Z Rotation Friction",
-					Type	= "Float",
-					Min		= 0,
-					Max		= 100,
-					Command = "precision_ZRotFric",
-					Description = "Rotation friction of advanced ballsocket in Z axis"}	 )
+			Panel:Help( "Parenting notes:" )
+			Panel:Help( "Parenting objects is most similar to a very strong weld, but it stops most interaction on the first object when you attach it to the second.  Players can walk on it, but it will fall through players.  It will not collide with objects or the world.  It will also not cause any extra physics lag/spaz." )
+			Panel:Help( "Parented objects are most useful for: Adding detail to moving objects without creating extra physics lag.  Things like houses that you want to move (though you can only safely walk on parented objects when they are still.)" )
+			Panel:Help( "Possible issues:  Remove constraints first to avoid spaz. Duplicating or such may cause the collision model to become separated." )
 
-			Panel:AddControl( "Checkbox", { Label = "Free Movement", Command = "precision_FreeMov", Description = "Only lock relative rotation, not position?"  } )
-		end
+		elseif ( mode == 10 ) then //repair
 
-		if ( mode == 8 ) then //slider
-			Panel:AddControl( "Slider",  { Label	= "Slider Width",
-					Type	= "Float",
-					Min		= 0.0,
-					Max		= 10,
-					Command = "precision_width",
-					Description = "Width of the slider black line (0 = invisible)"}	 )
+			Panel:Help( "Repair mode" )
+			Panel:Help( "Usage: When a contraption is going crazy, colliding, making rubbing noises." )
+			Panel:Help( "What it does: Temporarily toggles collisions, allowing things that are bent out of shape to pop back." )
+			Panel:Help( "Warning: No guarantees.  This may turn things inside-out or make things worse depending on the situation." )
 
-			Panel:AddControl( "Checkbox", { Label = "Turn Off Minor Slider Stabilisation", Command = "precision_disablesliderfix", Description = "Fix being separate X/Y/Z advanced ballsocket locks between the props.  This stops most spaz caused by rotation, but not spaz caused by displacement." } )
-			Panel:AddControl( "Label", { Text = "Stabilisation is separate X/Y/Z adv. ballsockets; it makes it far less prone to rotation triggered spaz, but the difference is only noticeable sometimes as it's still just as prone to spaz caused by drifting.", Description	= "Due to lack of working descriptions at time of coding" }  )
-		end
+		elseif ( mode == 11 ) then //removal
 
-		if ( mode == 9 ) then //parent
-			Panel:AddControl( "Label", { Text = "Parenting Notes:", Description	= "Due to lack of working descriptions at time of coding" }  )
-			Panel:AddControl( "Label", { Text = "Parenting objects is most similar to a very strong weld, but it stops most interaction on the first object when you attach it to the second.  Players can walk on it, but it will fall through players.  It will not collide with objects or the world.  It will also not cause any extra physics lag/spaz.  Try it out on a test object, and decide if it's useful to you!", Description	= "Due to lack of working descriptions at time of coding" }  )
-
-			Panel:AddControl( "Label", { Text = "Parented objects are most useful for: Adding detail to moving objects without creating extra physics lag.  Things like houses that you want to move (though you can only safely walk on parented objects when they are still.)", Description	= "Due to lack of working descriptions at time of coding" }  )
-
-			Panel:AddControl( "Label", { Text = "Possible issues:  Remove constraints first to avoid spaz. Duplicating or such may cause the collision model to become separated.  Best to test it if in doubt.", Description	= "Why must labels cause menu flicker? D:" }  )
-		end
-		
-		if ( mode == 10 ) then //repair
-			Panel:AddControl( "Label", { Text = "Repair mode", Description	= "" }  )
-			Panel:AddControl( "Label", { Text = "Usage: When a contraption is going crazy, colliding, making rubbing noises.", Description	= "" }  )
-			Panel:AddControl( "Label", { Text = "What it does: Temporarily toggles collisions, allowing things that are bent out of shape to pop back.", Description	= "" }  )
-			Panel:AddControl( "Label", { Text = "Warning: No guarantees.  This may turn things inside-out or make things worse depending on the situation.", Description	= "" }  )
-		end
-		if ( mode == 11 ) then //removal
-			Panel:AddControl( "Label", { Text = "This mode will remove:", Description	= "" }  )
-			Panel:AddControl( "Checkbox", { Label = "Nocollide", Command = "precision_removal_nocollide", Description = "" } )
-			Panel:AddControl( "Checkbox", { Label = "Weld", Command = "precision_removal_weld", Description = "" } )
-			Panel:AddControl( "Checkbox", { Label = "Axis", Command = "precision_removal_axis", Description = "" } )
-			Panel:AddControl( "Checkbox", { Label = "Ballsocket", Command = "precision_removal_ballsocket", Description = "" } )
-			Panel:AddControl( "Checkbox", { Label = "Adv. Ballsocket", Command = "precision_removal_advballsocket", Description = "" } )
-			Panel:AddControl( "Checkbox", { Label = "Slider", Command = "precision_removal_slider", Description = "" } )
-			Panel:AddControl( "Checkbox", { Label = "Parent", Command = "precision_removal_parent", Description = "" } )
-			Panel:AddControl( "Checkbox", { Label = "Other", Command = "precision_removal_other", Description = "" } )
-			Panel:AddControl( "Label", { Text = "(Other = Rope/slider variants like winch/hydraulic, also motor/keepupright)", Description	= "" }  )
-			Panel:AddControl( "Button", { Label = "Select All", Command = "precision_removal_all", Description = ""  } )
-			Panel:AddControl( "Button", { Label = "Select None", Command = "precision_removal_none", Description = ""  } )
+			Panel:Help( "This mode will remove:" )
+			Panel:CheckBox( "No Collide", "precision_removal_nocollide" )
+			Panel:CheckBox( "Ballsocket", "precision_removal_ballsocket" )
+			Panel:CheckBox( "Axis", "precision_removal_axis" )
+			Panel:CheckBox( "Adv. Ballsocket", "precision_removal_advballsocket" )
+			Panel:CheckBox( "Slider", "precision_removal_slider" )
+			Panel:CheckBox( "Parent", "precision_removal_parent" )
+			Panel:CheckBox( "Weld", "precision_removal_weld" )
+			Panel:CheckBox( "Other", "precision_removal_other" )
+			Panel:Help( "(Other = Rope/slider variants like winch/hydraulic, also motor/keepupright)" )
+			local selectAll = vgui.Create( "DButton", Panel )
+			local selectNone = vgui.Create( "DButton", Panel )
+			function selectAll:DoClick() LocalPlayer():ConCommand( "precision_removal_all" ) end
+			function selectNone:DoClick() LocalPlayer():ConCommand( "precision_removal_none" ) end
+			selectAll:SetText( "Select All" )
+			selectNone:SetText( "Select None" )
+			Panel:AddPanel( selectAll )
+			Panel:AddPanel( selectNone )
 
 		end
 		if ( showgenmenu == 1 ) then
-			Panel:AddControl( "Button", { Label = "\\/ General Tool Options \\/", Command = "precision_generalmenu", Description = "Collapse menu"  } )
-
-
-
-
-		local params = {Label = "User Level",Description = "Shows options appropriate to user experience level", MenuButton = "0", Height = 67, Options = {}}
-		if ( user == 1 ) then
-			params.Options[" 1 ->Normal<-"] = { precision_setuser = "1" }
-		else
-			params.Options[" 1   Normal"] = { precision_setuser = "1" }
-		end
-		if ( user == 2 ) then
-			params.Options[" 2 ->Advanced<-"] = { precision_setuser = "2" }
-		else
-			params.Options[" 2   Advanced"] = { precision_setuser = "2" }
-		end
-		if ( user == 3 ) then
-			params.Options[" 3 ->Experimental<-"] = { precision_setuser = "3" }
-		else
-			params.Options[" 3   Experimental"] = { precision_setuser = "3" }
-		end
-
-		Panel:AddControl( "ListBox", params )
-
-			//Panel:AddControl( "Label", { Text = "General Tool Options:", Description	= "Note: These don't save with presets." }  )
-			Panel:AddControl( "Checkbox", { Label = "Enable tool feedback messages?", Command = "precision_enablefeedback", Description = "Toggle for feedback messages incase they get annoying"  } )
-			Panel:AddControl( "Checkbox", { Label = "On = Feedback in Chat, Off = Centr Scrn", Command = "precision_chatfeedback", Description = "Chat too cluttered? Can have messages centre screen instead"  } )
-			//Panel:AddControl( "Checkbox", { Label = "Hide Menu Tips?", Command = "precision_hidehints", Description = "Streamline the menu once you're happy with using the tool."  } )
-			Panel:AddControl( "Checkbox", { Label = "Add Push/Pull to Undo List", Command = "precision_nudgeundo", Description = "For if you're in danger of nudging somthing to where you can't reach it"  } )
-			Panel:AddControl( "Checkbox", { Label = "Add Movement to Undo List", Command = "precision_moveundo", Description = "So you don't have to secondary fire with nocollide to undo mistakes"  } )
-			Panel:AddControl( "Checkbox", { Label = "Add Rotation to Undo List", Command = "precision_rotateundo", Description = "So you can find the exact rotation value easier"  } )
-			Panel:AddControl( "Button", { Label = "Restore Current Mode Default", Command = "precision_defaultrestore", Description = "Collapse menu"  } )
-		else
-			Panel:AddControl( "Button", { Label = "-- General Tool Options --", Command = "precision_generalmenu", Description = "Expand menu"  } )
+			local generalMenu = vgui.Create( "DButton", Panel )
+			function generalMenu:DoClick() LocalPlayer():ConCommand( "precision_generalmenu" ) end
+			generalMenu:SetText( "General Tool Options" )
+			Panel:AddPanel( generalMenu )
+			local params = vgui.Create( "CtrlListBox", Panel )
+			local paramsLabel = vgui.Create( "DLabel", Panel )
 			if ( user == 1 ) then
-				Panel:AddControl( "Label", { Text = "(Note: For more modes and options like slider, use this options button and change the user level)", Description = "" }  )
+				params:AddOption( " 1 ->Normal<-", { precision_setuser = "1" } )
+			else
+				params:AddOption( " 1   Normal", { precision_setuser = "1" } )
+			end
+			if ( user == 2 ) then
+				params:AddOption( " 2 ->Advanced<-", { precision_setuser = "2" } )
+			else
+				params:AddOption( " 2   Advanced", { precision_setuser = "2" } )
+			end
+			if ( user == 3 ) then
+				params:AddOption( " 3 ->Experimental<-", { precision_setuser = "3" } )
+			else
+				params:AddOption( " 3   Experimental", { precision_setuser = "3" } )
+			end
+			paramsLabel:SetText( "User level" )
+			paramsLabel:SetDark( true )
+			params:SetHeight( 25 )
+			params:Dock( TOP )
+			Panel:AddItem( paramsLabel, params )
+			Panel:CheckBox( "Enable Feedback", "precision_enablefeedback" )
+			Panel:ControlHelp( "Toggle for feedback messages in case they get annoying." )
+			Panel:CheckBox( "Feedback in Chat", "precision_chatfeedback" )
+			Panel:ControlHelp( "Feedback displayed centre screen instead of in the chat." )
+			Panel:CheckBox( "Add Push/Pull to undo", "precision_nudgeundo" )
+			Panel:ControlHelp( "For if you're in danger of nudging somthing to where you can't reach it." )
+			Panel:CheckBox( "Add Movement to undo", "precision_moveundo" )
+			Panel:ControlHelp( "So you don't have to secondary fire with nocollide to undo mistakes." )
+			Panel:CheckBox( "Add Rotation to undo", "precision_rotateundo" )
+			Panel:ControlHelp( "So you can find the exact rotation value easier." )
+			local restore = vgui.Create( "DButton", Panel )
+			function restore:DoClick() LocalPlayer():ConCommand( "precision_defaultrestore" ) end
+			restore:SetText( "Restore Default Mode" )
+			Panel:AddPanel( restore )
+		else
+			local generalTool = vgui.Create( "DButton", Panel )
+			function generalTool:DoClick() LocalPlayer():ConCommand( "precision_generalmenu" ) end
+			generalTool:SetText( "General Tool Options" )
+			Panel:AddPanel( generalTool )
+			if ( user == 1 ) then
+				Panel:Help( "(Note: For more modes and options like slider, use this options button and change the user level)" )
 			end
 		end
 	end
-
-
 
 	local function precision_defaults()
 		local mode = LocalPlayer():GetInfoNum( "precision_mode", 3 )
@@ -1558,7 +1478,6 @@ if CLIENT then
 		precision_updatecpanel()
 	end
 	concommand.Add( "precision_generalmenu", precision_genmenu )
-	
 
 	function precision_setmode( player, tool, args )
 		if LocalPlayer():GetInfoNum( "precision_mode", 3 ) != args[1] then
@@ -1568,7 +1487,6 @@ if CLIENT then
 	end
 	concommand.Add( "precision_setmode", precision_setmode )
 
-
 	function precision_setuser( player, tool, args )
 		if LocalPlayer():GetInfoNum( "precision_user", 3 ) != args[1] then
 			RunConsoleCommand("precision_user", args[1])
@@ -1576,7 +1494,6 @@ if CLIENT then
 		end
 	end
 	concommand.Add( "precision_setuser", precision_setuser )
-
 
 	function precision_updatecpanel()
 		local Panel = controlpanel.Get( "precision" )
