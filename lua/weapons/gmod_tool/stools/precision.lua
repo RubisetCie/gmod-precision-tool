@@ -1077,12 +1077,8 @@ if CLIENT then
 		presets:AddConVar( "precision_disablesliderfix" )
 		Panel:AddPanel( presets )
 
-		local pp = Panel:NumSlider( "Push/Pull Amount", "precision_nudge", 1, 100, 4 )
-		local ppDef = GetConVar( "precision_nudge" )
+		Panel:NumSlider( "Push/Pull Amount", "precision_nudge", 1, 100, 4 )
 		Panel:ControlHelp( "Distance to push/pull props with altfire/reload." )
-		if ( ppDef ) then
-			ctrl:SetDefaultValue( ppDef:GetDefault() )
-		end
 
 		Panel:CheckBox( "Push/Pull as Percent (%)", "precision_nudgepercent" )
 		Panel:ControlHelp( "Takes % of width from target prop when pushing/pulling, instead of exact units." )
