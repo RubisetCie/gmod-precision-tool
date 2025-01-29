@@ -56,6 +56,8 @@ TOOL.ClientConVar[ "nudgeundo" ]		= "0"
 TOOL.ClientConVar[ "moveundo" ]			= "1"
 TOOL.ClientConVar[ "rotateundo" ]		= "1"
 
+local math = math
+
 function TOOL:DoParent( Ent1, Ent2 )
 	local TempEnt = Ent2
 	if !(Ent1 && Ent1:IsValid() && Ent1:EntIndex() != 0) then
