@@ -28,7 +28,7 @@ TOOL.ClientConVar[ "nudge" ]			= "25"
 TOOL.ClientConVar[ "nudgepercent" ]		= "1"
 TOOL.ClientConVar[ "disablesliderfix" ]	= "0"
 
-//adv ballsocket
+--Adv ballsocket
 TOOL.ClientConVar[ "XRotMin" ]		= "-180"
 TOOL.ClientConVar[ "XRotMax" ]		= "180"
 TOOL.ClientConVar[ "YRotMin" ]		= "-180"
@@ -40,7 +40,7 @@ TOOL.ClientConVar[ "YRotFric" ]		= "0"
 TOOL.ClientConVar[ "ZRotFric" ]		= "0"
 TOOL.ClientConVar[ "FreeMov" ]		= "0"
 
-//Removal
+--Removal
 TOOL.ClientConVar[ "removal_nocollide" ]	= "1"
 TOOL.ClientConVar[ "removal_weld" ]	 		= "1"
 TOOL.ClientConVar[ "removal_axis" ]	 		= "1"
@@ -49,7 +49,6 @@ TOOL.ClientConVar[ "removal_advballsocket" ]= "1"
 TOOL.ClientConVar[ "removal_slider" ]	 	= "1"
 TOOL.ClientConVar[ "removal_parent" ]	 	= "1"
 TOOL.ClientConVar[ "removal_other" ]	 	= "1"
-
 
 TOOL.ClientConVar[ "enablefeedback" ]	= "1"
 TOOL.ClientConVar[ "chatfeedback" ]		= "1"
@@ -87,7 +86,7 @@ function TOOL:DoParent( Ent1, Ent2 )
 			break
 		elseif ( TempEnt:GetParent() == Ent1 ) then
 			UndoParent( TempEnt )
-			timer.Simple( 0.1, function()//delay to stop crash
+			timer.Simple( 0.1, function()--delay to stop crash
 				Ent1.SetParent( Ent1, Ent2)
 			end)
 			self:SendMessage( "Oops, Closed Parent Loop Detected; Broken loop and set parent." )
@@ -97,7 +96,7 @@ function TOOL:DoParent( Ent1, Ent2 )
 		end
 	end
 	Phys1:Wake()
-	//Phys1:UpdateShadow(Ent1:GetAngles(),Ent1:GetAngles())
+	--Phys1:UpdateShadow(Ent1:GetAngles(),Ent1:GetAngles())
 end
 
 function TOOL:UndoParent( Ent1 )
@@ -109,7 +108,7 @@ function TOOL:UndoParent( Ent1 )
 	if Phys1:IsValid() then
 		Phys1:EnableCollisions( true )
 		Phys1:Wake()
-		//Phys1:UpdateShadow(Ent1:GetAngles(),Ent1:GetAngles())
+		--Phys1:UpdateShadow(Ent1:GetAngles(),Ent1:GetAngles())
 	end
 end
 
@@ -117,12 +116,12 @@ function TOOL:DoApply(CurrentEnt, FirstEnt, autorotate, nocollideall, ShadowDisa
 	local CurrentPhys = CurrentEnt:GetPhysicsObject()
 
 	if ( autorotate ) then
-		if ( CurrentEnt == FirstEnt ) then//Snap-rotate original object first.  Rest needs to rotate around it.
+		if ( CurrentEnt == FirstEnt ) then--Snap-rotate original object first.  Rest needs to rotate around it.
 			local angle = CurrentPhys:RotateAroundAxis( Vector( 0, 0, 1 ), 0 )
 			self.anglechange = Vector( angle.p - (math.Round(angle.p/45))*45, angle.r - (math.Round(angle.r/45))*45, angle.y - (math.Round(angle.y/45))*45 )
 			if ( table.Count(self.TaggedEnts) == 1 ) then
 				angle.p = (math.Round(angle.p/45))*45
-				angle.r = (math.Round(angle.r/45))*45//Only rotate on these axies if it's singular.
+				angle.r = (math.Round(angle.r/45))*45--Only rotate on these axies if it's singular.
 			end
 			angle.y = (math.Round(angle.y/45))*45
 			CurrentPhys:SetAngles( angle )
@@ -167,8 +166,8 @@ function TOOL:UndoRepairToggle()
 		if ( CurrentEnt and CurrentEnt:IsValid() ) then
 			if !(CurrentEnt == Ent2 ) then
 				local CurrentPhys = CurrentEnt:GetPhysicsObject()
-				if ( CurrentPhys:IsValid() && !CurrentEnt:GetParent():IsValid() ) then//parent?
-					if ( CurrentEnt:GetPhysicsObjectCount() < 2 ) then //not a ragdoll
+				if ( CurrentPhys:IsValid() && !CurrentEnt:GetParent():IsValid() ) then--parent?
+					if ( CurrentEnt:GetPhysicsObjectCount() < 2 ) then --not a ragdoll
 						if ( CurrentEnt:GetCollisionGroup() == COLLISION_GROUP_WORLD ) then
 							CurrentEnt:SetCollisionGroup( COLLISION_GROUP_NONE )
 						elseif ( CurrentEnt:GetCollisionGroup() == COLLISION_GROUP_NONE ) then
@@ -190,32 +189,31 @@ end
 
 function TOOL:DoConstraint(mode)
 	self:SetStage(0)
-	// Get information we're about to use
-	local Ent1,  Ent2  = self:GetEnt(1),    self:GetEnt(2)
-
+	-- Get information we're about to use
+	local Ent1, Ent2 = self:GetEnt(1), self:GetEnt(2)
 	if ( !Ent1:IsValid() || CLIENT ) then
 		self:ClearObjects()
-		return false//Something happened to original target, don't continue
+		return false--Something happened to original target, don't continue
 	end
-	// Get client's CVars
-	local forcelimit 	= self:GetClientNumber( "forcelimit", 0 )
-	local freeze		= util.tobool( self:GetClientNumber( "freeze", 1 ) )
-	local nocollide		= self:GetClientNumber( "nocollide", 0 )
-	local nocollideall	= util.tobool( self:GetClientNumber( "nocollideall", 0 ) )
-	local torquelimit	= self:GetClientNumber( "torquelimit", 0 )
-	local width			= self:GetClientNumber( "width", 1 )
-	local friction		= self:GetClientNumber( "friction", 0 )
-	local physdis		= util.tobool( self:GetClientNumber( "physdisable", 0 ) )
+	-- Get client's CVars
+	local forcelimit = self:GetClientNumber( "forcelimit", 0 )
+	local freeze = util.tobool( self:GetClientNumber( "freeze", 1 ) )
+	local nocollide = self:GetClientNumber( "nocollide", 0 )
+	local nocollideall = util.tobool( self:GetClientNumber( "nocollideall", 0 ) )
+	local torquelimit = self:GetClientNumber( "torquelimit", 0 )
+	local width = self:GetClientNumber( "width", 1 )
+	local friction = self:GetClientNumber( "friction", 0 )
+	local physdis = util.tobool( self:GetClientNumber( "physdisable", 0 ) )
 	local ShadowDisable = util.tobool( self:GetClientNumber( "ShadowDisable", 0 ) )
-	local autorotate 	= util.tobool(self:GetClientNumber( "autorotate",1 ))
-	local removal_nocollide 	= util.tobool(self:GetClientNumber( "removal_nocollide",1 ))
-	local removal_weld 	= util.tobool(self:GetClientNumber( "removal_weld",1 ))
-	local removal_axis 	= util.tobool(self:GetClientNumber( "removal_axis",1 ))
-	local removal_ballsocket 	= util.tobool(self:GetClientNumber( "removal_ballsocket",1 ))
-	local removal_advballsocket 	= util.tobool(self:GetClientNumber( "removal_advballsocket",1 ))
-	local removal_slider 	= util.tobool(self:GetClientNumber( "removal_slider",1 ))
-	local removal_parent 	= util.tobool(self:GetClientNumber( "removal_parent",1 ))
-	local removal_other 	= util.tobool(self:GetClientNumber( "removal_other",1 ))
+	local autorotate = util.tobool(self:GetClientNumber( "autorotate",1 ))
+	local removal_nocollide = util.tobool(self:GetClientNumber( "removal_nocollide",1 ))
+	local removal_weld = util.tobool(self:GetClientNumber( "removal_weld",1 ))
+	local removal_axis = util.tobool(self:GetClientNumber( "removal_axis",1 ))
+	local removal_ballsocket = util.tobool(self:GetClientNumber( "removal_ballsocket",1 ))
+	local removal_advballsocket = util.tobool(self:GetClientNumber( "removal_advballsocket",1 ))
+	local removal_slider = util.tobool(self:GetClientNumber( "removal_slider",1 ))
+	local removal_parent = util.tobool(self:GetClientNumber( "removal_parent",1 ))
+	local removal_other = util.tobool(self:GetClientNumber( "removal_other",1 ))
 	local Bone1 = self:GetBone(1)
 	local LPos1 = self:GetLocalPos(1)
 	local Bone2 = nil
@@ -232,32 +230,32 @@ function TOOL:DoConstraint(mode)
 		if ( CurrentEnt and CurrentEnt:IsValid() ) then
 			if !(CurrentEnt == Ent2 ) then
 				local CurrentPhys = CurrentEnt:GetPhysicsObject()
-				if ( CurrentPhys:IsValid() && !CurrentEnt:GetParent():IsValid() ) then//parent?
-					if ( CurrentEnt:GetPhysicsObjectCount() < 2 ) then //not a ragdoll
-						if (  util.tobool( nocollide ) && (mode == 1 || mode == 3)) then // not weld/axis/ballsocket or single application
+				if ( CurrentPhys:IsValid() && !CurrentEnt:GetParent():IsValid() ) then--parent?
+					if ( CurrentEnt:GetPhysicsObjectCount() < 2 ) then --not a ragdoll
+						if (  util.tobool( nocollide ) && (mode == 1 || mode == 3)) then -- not weld/axis/ballsocket or single application
 							local constraint = constraint.NoCollide(CurrentEnt, Ent2, 0, Bone2)
 						end
-						if ( mode == 1 ) then //Apply
+						if ( mode == 1 ) then --Apply
 							self:DoApply( CurrentEnt, Ent1, autorotate, nocollideall, ShadowDisable )
-						elseif ( mode == 2 ) then //Rotate
-							//self:SendMessage("Sorry, No entire contraption rotating... yet")
-							//return false//TODO: Entire contrpation rotaton
-						elseif ( mode == 3 ) then //move
-							//self:SendMessage("Sorry, No entire contraption moving... yet")
-							//return false//todo: entire contraption move/snap
-						elseif ( mode == 4 ) then //weld
+						--[[elseif ( mode == 2 ) then --Rotate
+							--self:SendMessage("Sorry, No entire contraption rotating... yet")
+							--return false--TODO: Entire contrpation rotaton
+						elseif ( mode == 3 ) then --move
+							--self:SendMessage("Sorry, No entire contraption moving... yet")
+							--return false--todo: entire contraption move/snap]]
+						elseif ( mode == 4 ) then --weld
 							local constr = constraint.Weld( CurrentEnt, Ent2, 0, Bone2, forcelimit,  util.tobool( nocollide ) )
 							self:CreateUndo(constr,"Precision_Weld")
-						elseif ( mode == 5 ) then //doaxis
+						elseif ( mode == 5 ) then --doaxis
 							local constr = constraint.Axis( CurrentEnt, Ent2, Bone1, Bone2, LPos1, LPos2, forcelimit, torquelimit, friction, nocollide )
 							self:CreateUndo(constr,"Precision_Axis")
-						elseif ( mode == 6 ) then //ballsocket
+						elseif ( mode == 6 ) then --ballsocket
 							local constr = constraint.Ballsocket( CurrentEnt, Ent2, 0, Bone2, LPos2, forcelimit, torquelimit, nocollide )
 							self:CreateUndo(constr,"Precision_Ballsocket")
-						elseif ( mode == 7 ) then //adv ballsocket
+						elseif ( mode == 7 ) then --adv ballsocket
 							local constr = constraint.AdvBallsocket( CurrentEnt, Ent2, 0, Bone2, LPos1, LPos2, forcelimit, torquelimit, self:GetClientNumber( "XRotMin", -180 ), self:GetClientNumber( "YRotMin", -180 ), self:GetClientNumber( "ZRotMin", -180 ), self:GetClientNumber( "XRotMax", 180 ), self:GetClientNumber( "YRotMax", 180 ), self:GetClientNumber( "ZRotMax", 180 ), self:GetClientNumber( "XRotFric", 0 ), self:GetClientNumber( "YRotFric", 0 ), self:GetClientNumber( "ZRotFric", 0 ), self:GetClientNumber( "FreeMov", 0 ), nocollide )
 							self:CreateUndo(constr,"Precision_Advanced_Ballsocket")
-						elseif ( mode == 8 ) then //slider
+						elseif ( mode == 8 ) then --slider
 							local constraint0 = constraint.Slider( CurrentEnt, Ent2, 0, Bone2, LPos1, LPos2, width )
 							if (constraint0) then
 								undo.Create("Precision_Slider")
@@ -280,15 +278,15 @@ function TOOL:DoConstraint(mode)
 								undo.Finish()
 								self:GetOwner():AddCleanup( "constraints", constraint0 )
 							end
-						elseif ( mode == 9 ) then //Parent
+						elseif ( mode == 9 ) then --Parent
 							self:DoParent( CurrentEnt, Ent2 )
-						elseif ( mode == 10 && !self.RepairTodo ) then//Repair spaz
+						elseif ( mode == 10 && !self.RepairTodo ) then--Repair spaz
 							if ( CurrentEnt:GetCollisionGroup() == COLLISION_GROUP_WORLD ) then
 								CurrentEnt:SetCollisionGroup( COLLISION_GROUP_NONE )
 							elseif ( CurrentEnt:GetCollisionGroup() == COLLISION_GROUP_NONE ) then
 								CurrentEnt:SetCollisionGroup( COLLISION_GROUP_WORLD )
 							end
-								//CurrentPhys:EnableGravity( !CurrentPhys:IsGravityEnabled() )//Can't disable gravity - sliders would go nuts and disappear.	
+							--CurrentPhys:EnableGravity( !CurrentPhys:IsGravityEnabled() )--Can't disable gravity - sliders would go nuts and disappear.
 							local speeddamp,angledamp = CurrentPhys:GetDamping()
 							if ( speeddamp == 0 && angledamp == 0 ) then
 								CurrentPhys:SetDamping( 5, 5 )
@@ -297,8 +295,8 @@ function TOOL:DoConstraint(mode)
 							end
 							CurrentEnt:SetPos(CurrentEnt:GetPos())
 							CurrentPhys:Wake()
-						elseif ( mode == 11 ) then //Removal
-							if ( CLIENT ) then return true end//? should probably be in more places
+						elseif ( mode == 11 ) then --Removal
+							if ( CLIENT ) then return true end--? should probably be in more places
 							if ( removal_nocollide ) then
 								constraint.RemoveConstraints( CurrentEnt, "NoCollide" )
 								CurrentPhys:EnableCollisions(true)
@@ -343,7 +341,7 @@ function TOOL:DoConstraint(mode)
 			end
 		end
 		NumApp = NumApp + 1
-	end//Next
+	end--Next
 	if ( mode == 1 ) then
 		self:SendMessage( NumApp .. " items targeted for apply." )
 	elseif ( mode == 2 ) then
@@ -375,7 +373,7 @@ function TOOL:DoConstraint(mode)
 	else
 		self:ClearSelection()
 	end
-	// Clear the objects so we're ready to go again
+	-- Clear the objects so we're ready to go again
 	self:ClearObjects()
 end
 
@@ -388,20 +386,20 @@ function TOOL:SendMessage( message )
 	end
 end
 
-function TOOL:TargetValidity ( trace, Phys ) //TODO: Parented stuff should return 1
+function TOOL:TargetValidity ( trace, Phys ) --TODO: Parented stuff should return 1
 	if ( SERVER && (!util.IsValidPhysicsObject( trace.Entity, trace.PhysicsBone ) || !Phys:IsValid()) ) then
 		local mode = self:GetClientNumber( "mode" )
 		if ( trace.Entity:GetParent():IsValid() ) then
-			return 2//Valid parent, but itself isn't
+			return 2--Valid parent, but itself isn't
 		else
-			return 0//No valid phys
+			return 0--No valid phys
 		end
 	elseif ( trace.Entity:IsPlayer() ) then
-		return 0// Don't attach players, or to players
+		return 0-- Don't attach players, or to players
 	elseif ( trace.HitWorld ) then
-		return 1// Only allow second click to be here...
+		return 1-- Only allow second click to be here...
 	else
-		return 3//Everything seems good
+		return 3--Everything seems good
 	end
 end
 
@@ -428,7 +426,7 @@ function TOOL:StartRotate()
 	end
 
 	if IsValid( Phys ) then
-		Phys:EnableMotion( false ) //else it drifts
+		Phys:EnableMotion( false ) --else it drifts
 	end
 
 	local rotation = self:GetClientNumber( "rotation" )
@@ -445,11 +443,11 @@ function TOOL:StartRotate()
 	self.lastdegreesY = -((rotation/2) % rotation)
 	self.realdegreesZ = 0
 	self.lastdegreesZ = -((rotation/2) % rotation)
-	self.OldPos = self:GetPos(1)//trace.HitPos
+	self.OldPos = self:GetPos(1)--trace.HitPos
 end
 
 function TOOL:DoMove()
-	// Get information we're about to use
+	-- Get information we're about to use
 	local Norm1, Norm2 = self:GetNormal(1),   self:GetNormal(2)
 	local Phys1, Phys2 = self:GetPhys(1),     self:GetPhys(2)
 	local Ang1, Ang2 = Norm1:Angle(), (Norm2 * -1):Angle()
@@ -478,7 +476,7 @@ function TOOL:DoMove()
 
 	local rotation = self:GetClientNumber( "rotation" )
 	if ( rotation < 0.02 ) then rotation = 0.02 end
-	if ( (self:GetClientNumber( "rotate" ) == 1 && mode != 1) || mode == 2) then//Set axies for rotation mode directions
+	if ( (self:GetClientNumber( "rotate" ) == 1 && mode != 1) || mode == 2) then--Set axies for rotation mode directions
 		self.axis = Norm2
 		self.axisY = self.axis:Cross(Vector(0,1,0))
 		if self:WithinABit( self.axisY, Vector(0,0,0) ) then
@@ -504,7 +502,7 @@ function TOOL:DoMove()
 		self.axisZ:Normalize()
 	end
 
-	local TargetAngle = Phys1:AlignAngles( Ang1, Ang2 )//Get angle Phys1 would be at if difference between Ang1 and Ang2 was added
+	local TargetAngle = Phys1:AlignAngles( Ang1, Ang2 )--Get angle Phys1 would be at if difference between Ang1 and Ang2 was added
 
 	if self:GetClientNumber( "autorotate" ) == 1 then
 		TargetAngle.p = (math.Round(TargetAngle.p/45))*45
@@ -531,14 +529,14 @@ function TOOL:DoMove()
 	end
 	Norm2 = Norm2 * (-0.0625 + NewOffset)
 	local TargetPos = self:GetPos(2) + (Phys1:GetPos() - self:GetPos(1)) + (Norm2)
-	//self:SetPos(2)
+	--self:SetPos(2)
 
-	// Set the position
+	-- Set the position
 
 	Phys1:SetPos( TargetPos )
 	Phys1:EnableMotion( false )
 
-	// Wake up the physics object so that the entity updates
+	-- Wake up the physics object so that the entity updates
 	Phys1:Wake()
 end
 
@@ -617,15 +615,15 @@ function TOOL:SelectEnts(StartEnt, AllConnected)
 end
 
 function TOOL:LeftClick( trace )
-	local stage = self:GetStage()//0 = started, 1 = moving/second target, 2 = rotation?
+	local stage = self:GetStage()--0 = started, 1 = moving/second target, 2 = rotation?
 	local mode = self:GetClientNumber( "mode" )
 	local moving = ( mode == 3 || (self:GetClientNumber( "move" ) == 1 && mode >= 3 && mode <= 8 ) )
 	local rotating = ( self:GetClientNumber( "rotate" ) == 1 )
 	local Phys = trace.Entity:GetPhysicsObjectNum( trace.PhysicsBone )
 
-	if ( stage == 0 ) then//first click - choose a target.
+	if ( stage == 0 ) then--first click - choose a target.
 		if ( self:TargetValidity(trace, Phys) <= 1 ) then
-			return false//No phys or hit world
+			return false--No phys or hit world
 		end
 		self:SetObject( 1, trace.Entity, trace.HitPos, Phys, trace.PhysicsBone, trace.HitNormal )
 
@@ -634,16 +632,16 @@ function TOOL:LeftClick( trace )
 		else
 			self:SelectEnts(trace.Entity,0)
 		end
-		if ( mode == 1 || mode == 10 || mode == 11 ) then //Don't care about stage, always apply.
+		if ( mode == 1 || mode == 10 || mode == 11 ) then --Don't care about stage, always apply.
 			self:DoConstraint(mode)
 		else
 			if ( mode == 9 ) then
 				self:SetStage(1)
 			else
-				if ( moving ) then//Moving
+				if ( moving ) then--Moving
 					self:StartGhostEntity( trace.Entity )
 					self:SetStage(1)
-				elseif ( mode == 2 ) then//Straight to rotate
+				elseif ( mode == 2 ) then--Straight to rotate
 					self:StartRotate()
 					self:SetStage(2)
 				else
@@ -651,7 +649,7 @@ function TOOL:LeftClick( trace )
 				end
 			end
 		end
-	elseif ( stage == 1 ) then//Second click
+	elseif ( stage == 1 ) then--Second click
 		self:SetObject( 2, trace.Entity, trace.HitPos, Phys, trace.PhysicsBone, trace.HitNormal )
 
 		if ( self:GetEnt(1) == self:GetEnt(2) ) then
@@ -667,7 +665,7 @@ function TOOL:LeftClick( trace )
 				end
 				if ( SERVER && !game.SinglePlayer() ) then
 					self:ReleaseGhostEntity()
-					//return true
+					--return true
 				end
 				self:DoMove()
 			end
@@ -678,7 +676,7 @@ function TOOL:LeftClick( trace )
 				self:DoConstraint(mode)
 			end
 		end
-	elseif ( stage == 2 ) then//Done rotate
+	elseif ( stage == 2 ) then--Done rotate
 		self:DoConstraint(mode)
 	end
 	return true
@@ -743,7 +741,7 @@ end
 
 function TOOL:UpdateCustomGhost( ghost, player, offset )
 
-	// Ghost is identically buggy to that of easyweld...  welding two frozen props and two unfrozen props yields different ghosts even if identical allignment
+	-- Ghost is identically buggy to that of easyweld...  welding two frozen props and two unfrozen props yields different ghosts even if identical allignment
 
 	if (ghost == nil) then return end
 	if (!ghost:IsValid()) then ghost = nil return end
@@ -789,7 +787,7 @@ end
 
 
 function TOOL:Think()
-	//if CLIENT then return end
+	--if CLIENT then return end
 	local pl = self:GetOwner()
 	local wep = pl:GetActiveWeapon()
 	if not wep:IsValid() or wep:GetClass() != "gmod_tool" or pl:GetInfo("gmod_toolmode") != "precision" then return end
@@ -806,7 +804,7 @@ function TOOL:Think()
 
 	if self:NumObjects() == 1 && mode != 2 then
 		if ( (self:GetClientNumber( "move" ) == 1 && mode >= 3) || mode == 3 ) then
-			if ( mode <= 8 ) then//no move = no ghost in parent mode
+			if ( mode <= 8 ) then--no move = no ghost in parent mode
 				local offset = math.Clamp( self:GetClientNumber( "offset" ), -5000, 5000 )
 				self:UpdateCustomGhost( self.GhostEntity, self:GetOwner(), offset )
 			end
@@ -852,7 +850,7 @@ function TOOL:Think()
 			if ( ( self:GetClientNumber( "move" ) == 1 && mode >= 3) || mode == 3 ) then
 				local WPos2 = self:GetPos(2)
 				local Ent2 = self:GetEnt(2)
-				// Move so spots join up
+				-- Move so spots join up
 				local Norm2 = self:GetNormal(2)
 
 				local NewOffset = offset
@@ -879,7 +877,7 @@ function TOOL:Think()
 				end
 				Phys1:SetPos( TargetPos )
 			else
-				// Move so rotating on axis
+				-- Move so rotating on axis
 
 				local TargetPos = (Phys1:GetPos() - self:GetPos(1)) + self.OldPos
 				Phys1:SetPos( TargetPos )
@@ -902,7 +900,7 @@ function TOOL:Nudge( trace, direction )
 			offset = -max
 		end
 	end
-	//if ( offset == 0 ) then offset = 1 end
+	--if ( offset == 0 ) then offset = 1 end
 	local NewOffset = offset
 	if ( offsetpercent ) then
 		local glower = trace.Entity:OBBMins()
@@ -914,7 +912,7 @@ function TOOL:Nudge( trace, direction )
 			height = math.abs(gupper.y - glower.y)-0.5
 		end
 		NewOffset = NewOffset / 100
-		local cap = math.floor(max / height)//No more than max units.
+		local cap = math.floor(max / height)--No more than max units.
 		if ( NewOffset > cap ) then
 			NewOffset = cap
 		elseif ( NewOffset < -cap ) then
@@ -945,12 +943,12 @@ function TOOL:Nudge( trace, direction )
 							undo.SetPlayer(self:GetOwner())
 							undo.AddFunction( NudgeUndo, CurrentEnt, oldpos )
 						undo.Finish()
-					end*/// todo: all in 1 undo for mass nudging
+					end*--/ todo: all in 1 undo for mass nudging
 
 					local TargetPos = CurrentPhys:GetPos() + trace.HitNormal * NewOffset * direction
 					CurrentPhys:SetPos( TargetPos )
 					CurrentPhys:Wake()
-					if (CurrentEnt:GetMoveType() == 0 ) then //phys disabled, so move manually
+					if (CurrentEnt:GetMoveType() == 0 ) then --phys disabled, so move manually
 						CurrentEnt:SetPos( TargetPos )
 					end
 
@@ -1035,7 +1033,7 @@ if CLIENT then
 	language.Add("undone.precision.advanced.ballsocket", "Undone Precision Advanced Ballsocket")
 	language.Add("undone.precision.slider", "Undone Precision Slider")
 
-	local showgenmenu = 0//Seems to hide often, probably for the best
+	local showgenmenu = 0--Seems to hide often, probably for the best
 
 	local function AddDefControls( Panel )
 		Panel:Clear()
@@ -1088,12 +1086,12 @@ if CLIENT then
 
 		local list = vgui.Create("DListView")
 
-		//17 per item + 16 for title
-		local height = 203 //All 11 shown
+		--17 per item + 16 for title
+		local height = 203 --All 11 shown
 		if ( user < 2 ) then
-			height = 135 //7 shown
+			height = 135 --7 shown
 		elseif ( user < 3 ) then
-			height = 170 //9 shown
+			height = 170 --9 shown
 		end
 
 		list:SetSize(30,height)
@@ -1206,7 +1204,7 @@ if CLIENT then
 		end
 
 		if ( user >= 3 ) then
-			if ( mode == 1 ) then //apply
+			if ( mode == 1 ) then --apply
 				Panel:CheckBox( "Only Collide with Player", "precision_nocollideall" )
 				Panel:ControlHelp( "No collides the first prop to everything and the world (except players collide with it)." )
 				Panel:CheckBox( "Disable Physics", "precision_physdisable" )
@@ -1214,36 +1212,36 @@ if CLIENT then
 				Panel:CheckBox( "Allow Physgun on Disabled", "precision_allowphysgun" )
 				Panel:ControlHelp( "Use if you want to be able to manually move props after phyics disabling them." )
 			end
-			if ( mode == 9 ) then //parent
+			if ( mode == 9 ) then --parent
 				Panel:CheckBox( "Allow Physgun on Parented", "precision_allowphysgun" )
 				Panel:ControlHelp( "Use this if you want to play with the parenting hierarchy etc." )
 			end
 		end
 		if ( user >= 2 ) then
-			if ( mode != 2 && mode != 3 && mode != 10 ) then //todo: entire contrap move/rotate support
+			if ( mode != 2 && mode != 3 && mode != 10 ) then --todo: entire contrap move/rotate support
 				Panel:CheckBox( "Entire Contraption", "precision_entirecontrap" )
 				Panel:ControlHelp( "For mass constraining or removal or nudging or applying of things." )
 			end
 		end
 
 		if ( user >= 2 ) then
-			if ( (mode >= 4 && mode <= 7) ) then //breakable constraint
+			if ( (mode >= 4 && mode <= 7) ) then --breakable constraint
 				Panel:NumSlider( "Force Breakpoint", "precision_forcelimit", 0, 5000, 2 )
 				Panel:ControlHelp( "Applies to most constraint modes." )
 			end
 
-			if ( mode == 5 || mode == 6 || mode == 7 ) then //axis or ballsocket
+			if ( mode == 5 || mode == 6 || mode == 7 ) then --axis or ballsocket
 				Panel:NumSlider( "Torque Breakpoint", "precision_torquelimit", 0, 5000, 2 )
 				Panel:ControlHelp( "Breakpoint of turning/rotational force." )
 			end
 		end
 
-		if ( mode == 5 ) then //axis
+		if ( mode == 5 ) then --axis
 
 			Panel:NumSlider( "Axis Friction", "precision_friction", 0, 100, 2 )
 			Panel:ControlHelp( "Turning resistance, this is best at 0 in most cases to conserve energy." )
 
-		elseif ( mode == 7 ) then //adv ballsocket
+		elseif ( mode == 7 ) then --adv ballsocket
 
 			Panel:NumSlider( "X Rotation Minimum", "precision_XRotMin", -180, 180, 2 )
 			Panel:ControlHelp( "Rotation minimum of advanced ballsocket in X axis." )
@@ -1268,7 +1266,7 @@ if CLIENT then
 			Panel:CheckBox( "Free Movement", "precision_FreeMov" )
 			Panel:ControlHelp( "Only lock relative rotation, not position." )
 
-		elseif ( mode == 8 ) then //slider
+		elseif ( mode == 8 ) then --slider
 
 			Panel:NumSlider( "Slider Width", "precision_width", 0, 10, 2 )
 			Panel:ControlHelp( "Width of the slider black line (0 = invisible)." )
@@ -1276,21 +1274,21 @@ if CLIENT then
 			Panel:ControlHelp( "Fix being separate X/Y/Z advanced ballsocket locks between the props." )
 			Panel:Help( "Stabilisation is separate X/Y/Z adv. ballsockets; it makes it far less prone to rotation triggered spaz." )
 
-		elseif ( mode == 9 ) then //parent
+		elseif ( mode == 9 ) then --parent
 
 			Panel:Help( "Parenting notes:" )
 			Panel:Help( "Parenting objects is most similar to a very strong weld, but it stops most interaction on the first object when you attach it to the second.  Players can walk on it, but it will fall through players.  It will not collide with objects or the world.  It will also not cause any extra physics lag/spaz." )
 			Panel:Help( "Parented objects are most useful for: Adding detail to moving objects without creating extra physics lag.  Things like houses that you want to move (though you can only safely walk on parented objects when they are still.)" )
 			Panel:Help( "Possible issues:  Remove constraints first to avoid spaz. Duplicating or such may cause the collision model to become separated." )
 
-		elseif ( mode == 10 ) then //repair
+		elseif ( mode == 10 ) then --repair
 
 			Panel:Help( "Repair mode" )
 			Panel:Help( "Usage: When a contraption is going crazy, colliding, making rubbing noises." )
 			Panel:Help( "What it does: Temporarily toggles collisions, allowing things that are bent out of shape to pop back." )
 			Panel:Help( "Warning: No guarantees.  This may turn things inside-out or make things worse depending on the situation." )
 
-		elseif ( mode == 11 ) then //removal
+		elseif ( mode == 11 ) then --removal
 
 			Panel:Help( "This mode will remove:" )
 			Panel:CheckBox( "No Collide", "precision_removal_nocollide" )
@@ -1494,7 +1492,7 @@ if CLIENT then
 	function precision_updatecpanel()
 		local Panel = controlpanel.Get( "precision" )
 		if (!Panel) then return end
-		//custom panel building ( wtf does Panel:AddDefaultControls() get it's defaults from? )
+		--custom panel building ( wtf does Panel:AddDefaultControls() get it's defaults from? )
 		AddDefControls( Panel )
 	end
 	concommand.Add( "precision_updatecpanel", precision_updatecpanel )
@@ -1532,8 +1530,8 @@ if CLIENT then
 		local stage = self:GetStage()
 		if ( stage == 2 ) then
 			return true
-		//elseif ( iNum > 0 && self:GetClientNumber("mode") == 2 ) then
-		//	return true
+		--elseif ( iNum > 0 && self:GetClientNumber("mode") == 2 ) then
+		--	return true
 		end
 		return false
 	end
