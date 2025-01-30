@@ -56,6 +56,9 @@ TOOL.ClientConVar[ "nudgeundo" ]		= "0"
 TOOL.ClientConVar[ "moveundo" ]			= "1"
 TOOL.ClientConVar[ "rotateundo" ]		= "1"
 
+local util = util
+local math = math
+
 function TOOL:DoParent( Ent1, Ent2 )
 	local TempEnt = Ent2
 	if !(Ent1 && Ent1:IsValid() && Ent1:EntIndex() != 0) then
@@ -209,7 +212,7 @@ function TOOL:DoConstraint(mode)
 	local removal_nocollide = util.tobool(self:GetClientNumber( "removal_nocollide",1 ))
 	local removal_weld = util.tobool(self:GetClientNumber( "removal_weld",1 ))
 	local removal_axis = util.tobool(self:GetClientNumber( "removal_axis",1 ))
-	local removal_ballsocke = util.tobool(self:GetClientNumber( "removal_ballsocket",1 ))
+	local removal_ballsocket = util.tobool(self:GetClientNumber( "removal_ballsocket",1 ))
 	local removal_advballsocket = util.tobool(self:GetClientNumber( "removal_advballsocket",1 ))
 	local removal_slider = util.tobool(self:GetClientNumber( "removal_slider",1 ))
 	local removal_parent = util.tobool(self:GetClientNumber( "removal_parent",1 ))
