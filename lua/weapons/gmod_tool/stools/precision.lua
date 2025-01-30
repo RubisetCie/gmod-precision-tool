@@ -935,7 +935,7 @@ function TOOL:Nudge( trace, direction )
 				local CurrentPhys = CurrentEnt:GetPhysicsObject()
 				if ( CurrentPhys:IsValid() ) then
 
-					/*if ( self:GetClientNumber( "nudgeundo" ) == 1 ) then
+					--[[if ( self:GetClientNumber( "nudgeundo" ) == 1 ) then
 						local oldpos = CurrentPhys:GetPos()
 						local function NudgeUndo( Undo, Entity, oldpos )
 							if CurrentEnt:IsValid() then
@@ -946,7 +946,7 @@ function TOOL:Nudge( trace, direction )
 							undo.SetPlayer(self:GetOwner())
 							undo.AddFunction( NudgeUndo, CurrentEnt, oldpos )
 						undo.Finish()
-					end*--/ todo: all in 1 undo for mass nudging
+					end]] -- todo: all in 1 undo for mass nudging
 
 					local TargetPos = CurrentPhys:GetPos() + trace.HitNormal * NewOffset * direction
 					CurrentPhys:SetPos( TargetPos )
