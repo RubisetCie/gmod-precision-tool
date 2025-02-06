@@ -58,6 +58,9 @@ TOOL.ClientConVar[ "rotateundo" ]		= "1"
 
 local util = util
 local math = math
+local vector_up = vector_up
+local vector_origin = vector_origin
+local vector_front = Vector(0,1,0)
 
 function TOOL:DoParent( Ent1, Ent2 )
 	local TempEnt = Ent2
@@ -120,7 +123,7 @@ function TOOL:DoApply(CurrentEnt, FirstEnt, autorotate, nocollideall, ShadowDisa
 
 	if ( autorotate ) then
 		if ( CurrentEnt == FirstEnt ) then--Snap-rotate original object first.  Rest needs to rotate around it.
-			local angle = CurrentPhys:RotateAroundAxis( Vector( 0, 0, 1 ), 0 )
+			local angle = CurrentPhys:RotateAroundAxis( vector_up, 0 )
 			self.anglechange = Vector( angle.p - (math.Round(angle.p/45))*45, angle.r - (math.Round(angle.r/45))*45, angle.y - (math.Round(angle.y/45))*45 )
 			if ( table.Count(self.TaggedEnts) == 1 ) then
 				angle.p = (math.Round(angle.p/45))*45
@@ -136,7 +139,7 @@ function TOOL:DoApply(CurrentEnt, FirstEnt, autorotate, nocollideall, ShadowDisa
 			else
 				CurrentEnt:SetPos( Vector( FirstEnt:GetPos().X + (distance*(math.cos(theta))), FirstEnt:GetPos().Y + (distance*(math.sin(theta))), CurrentEnt:GetPos().Z ) )
 			end
-			CurrentPhys:SetAngles( CurrentPhys:RotateAroundAxis( Vector( 0, 0, -1 ), self.anglechange.Z ) )
+			CurrentPhys:SetAngles( CurrentPhys:RotateAroundAxis( -vector_up, self.anglechange.Z ) )
 		end
 	end
 
@@ -436,7 +439,7 @@ function TOOL:StartRotate()
 	if ( rotation < 0.02 ) then rotation = 0.02 end
 	self.axis = self:GetNormal(1)
 	self.axisY = self.axis:Cross(Ent:GetUp())
-	if self:WithinABit( self.axisY, Vector(0,0,0) ) then
+	if self:WithinABit( self.axisY, vector_origin ) then
 		self.axisY = self.axis:Cross(Ent:GetForward())
 	end
 	self.axisZ = self.axisY:Cross(self.axis)
@@ -481,9 +484,9 @@ function TOOL:DoMove()
 	if ( rotation < 0.02 ) then rotation = 0.02 end
 	if ( (self:GetClientNumber( "rotate" ) == 1 && mode != 1) || mode == 2) then--Set axies for rotation mode directions
 		self.axis = Norm2
-		self.axisY = self.axis:Cross(Vector(0,1,0))
-		if self:WithinABit( self.axisY, Vector(0,0,0) ) then
-			self.axisY = self.axis:Cross(Vector(0,0,1))
+		self.axisY = self.axis:Cross(vector_front)
+		if self:WithinABit( self.axisY, vector_origin ) then
+			self.axisY = self.axis:Cross(vector_up)
 		end
 		self.axisY:Normalize()
 		self.axisZ = self.axisY:Cross(self.axis)
@@ -496,9 +499,9 @@ function TOOL:DoMove()
 		self.lastdegreesZ = -((rotation/2) % rotation)
 	else
 		self.axis = Norm2
-		self.axisY = self.axis:Cross(Vector(0,1,0))
-		if self:WithinABit( self.axisY, Vector(0,0,0) ) then
-			self.axisY = self.axis:Cross(Vector(0,0,1))
+		self.axisY = self.axis:Cross(vector_front)
+		if self:WithinABit( self.axisY, vector_origin ) then
+			self.axisY = self.axis:Cross(vector_up)
 		end
 		self.axisY:Normalize()
 		self.axisZ = self.axisY:Cross(self.axis)
@@ -872,7 +875,7 @@ function TOOL:Think()
 				end
 
 				Norm2 = Norm2 * (-0.0625 + NewOffset)
-				local TargetPos = Vector(0,0,0)
+				local TargetPos = vector_origin
 				if ( self:GetEnt(1) == self:GetEnt(2) ) then
 					TargetPos = SavedPos + (Phys1:GetPos() - self:GetPos(1)) + (Norm2)
 				else
